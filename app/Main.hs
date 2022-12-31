@@ -9,7 +9,8 @@ main = do
   -- Pure operations: summing numbers.
   --print $ runConduitPure $ yieldMany [1..10] .| sumC
   --iterEx
-  sinkEx
+  --sinkEx
+  transEx
 
 -- Exercise Work through what happens when we add .| mapM_C print to the mix
 -- above.
@@ -52,3 +53,21 @@ sinkEx = do
   print res
 
 -- Self evaluation: Just RTFM https://hackage.haskell.org/package/base-4.17.0.0/docs/Control-Applicative.html#t:Applicative
+
+--------------------------------------------------------------------------------
+
+-- EXERCISE Modify trans so that it does something different for the first 3,
+-- second 3, and final 3 values from upstream, and drops all other values.
+trans :: Monad m => ConduitT Int Int m ()
+trans = do
+    takeC 5 .| mapC (+ 1)
+    mapC (* 2)
+
+myTrans :: Monad m => ConduitT Int Int m ()
+myTrans = do
+    takeC 3 .| mapC (+ 2)
+    takeC 3 .| mapC (* 2)
+    takeC 3 .| mapC (^ 2)
+
+transEx :: IO ()
+transEx = runConduit $ yieldMany [1..10] .| myTrans .| mapM_C print
